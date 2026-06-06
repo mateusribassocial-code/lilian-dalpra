@@ -25,7 +25,7 @@ export const FILIAIS = [
     id: 'geral',
     label: 'Geral',
     metaAccounts: [{ id: '1278399991048623', label: 'Lilian Dalpra' }],
-    googleAdsAccounts: [],
+    googleAdsAccounts: [] as { id: string; label: string }[],
     budgetMeta: 0,
     budgetGoogle: 0,
     products: [],
