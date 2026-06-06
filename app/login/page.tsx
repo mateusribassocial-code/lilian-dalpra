@@ -8,7 +8,7 @@ import { CLIENT } from '@/lib/client.config'
 function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const redirect = searchParams.get('redirect') ?? '/dashboard'
+  const redirect = searchParams.get('redirect') ?? '/lilian-dalpra'
 
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
