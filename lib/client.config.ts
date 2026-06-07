@@ -15,6 +15,13 @@ export const FEATURES = {
   googleAds: false,
   ga4: false,
   crm: false as 'c2s' | 'datacrazy' | 'sheets' | false,
+  kanban: true,
+}
+
+export const KANBAN_CONFIG = {
+  spreadsheetId: '1IpEwPWYMdEHbEBDxutfcGs5GMGxQpfy2P7ra9Gmkn28',
+  stageColumn: 'Acompanhamento [Lilian]',
+  stages: ['Novo Lead', 'Tentativa de Contato', 'Em atendimento', 'Visita', 'Proposta', 'Fechado'] as const,
 }
 
 // ── Filiais / Unidades ────────────────────────────────────────────────────────
@@ -33,3 +40,4 @@ export const FILIAIS = [
 ]
 
 export type FilialConfig = typeof FILIAIS[number]
+export type KanbanStage = typeof KANBAN_CONFIG.stages[number]

@@ -8,12 +8,14 @@ import { Campaign, CrmFunnel, Ga4Data } from '@/lib/types'
 import { FILIAIS, CLIENT, FEATURES } from '@/lib/client.config'
 import { aggregateKpi } from '@/lib/meta'
 import { SellerStats } from '@/lib/crm'
+import { KanbanBoard } from '@/components/KanbanBoard'
 
 type ActiveTab = string
 
 const TABS = [
   ...FILIAIS.map(f => ({ id: f.id as ActiveTab, label: f.label, icon: '🏢' })),
   { id: 'analytics' as ActiveTab, label: 'Analytics & CRM', icon: '📊' },
+  { id: 'kanban' as ActiveTab, label: 'Kanban', icon: '🗂️' },
 ]
 
 const PERIOD_OPTIONS = [
@@ -682,6 +684,7 @@ export default function LilianDalpraDashboard() {
       <main className="max-w-7xl mx-auto px-4 py-6">
         {isFilialTab && <AdsPage filialId={activeTab} period={period} />}
         {activeTab === 'analytics' && <AnalyticsPage />}
+        {activeTab === 'kanban' && <div className="space-y-5"><KanbanBoard /></div>}
       </main>
     </div>
   )
