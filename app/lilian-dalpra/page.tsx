@@ -23,12 +23,14 @@ const PERIOD_OPTIONS = [
   { label: 'Últimos 7 dias', value: '7d' },
   { label: 'Últimos 30 dias', value: '30d' },
   { label: 'Mês anterior', value: 'last-month' },
+  { label: 'Personalizado', value: 'custom' },
 ]
 
-function getPeriodDates(period: string) {
+function getPeriodDates(period: string, customFrom = '', customTo = '') {
   const now = new Date()
   const pad = (n: number) => String(n).padStart(2, '0')
   const f = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+  if (period === 'custom') return { from: customFrom || f(new Date(now.getFullYear(), now.getMonth(), 1)), to: customTo || f(now) }
   if (period === 'current-month') return { from: f(new Date(now.getFullYear(), now.getMonth(), 1)), to: f(now) }
   if (period === '7d') { const d = new Date(now); d.setDate(d.getDate() - 7); return { from: f(d), to: f(now) } }
   if (period === '30d') { const d = new Date(now); d.setDate(d.getDate() - 30); return { from: f(d), to: f(now) } }
@@ -40,12 +42,37 @@ const brl = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', curren
 const brl2 = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 2, maximumFractionDigits: 2 })
 const num = (v: number) => v.toLocaleString('pt-BR')
 
-function PeriodSelect({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+function PeriodSelect({ value, onChange, customFrom, customTo, onCustomChange }: {
+  value: string
+  onChange: (v: string) => void
+  customFrom?: string
+  customTo?: string
+  onCustomChange?: (from: string, to: string) => void
+}) {
   return (
-    <select value={value} onChange={e => onChange(e.target.value)}
-      className="bg-zinc-800 border border-zinc-700 text-zinc-300 text-xs rounded-lg px-3 py-1.5 focus:outline-none focus:border-blue-500">
-      {PERIOD_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-    </select>
+    <div className="flex items-center gap-2 flex-wrap justify-end">
+      <select value={value} onChange={e => onChange(e.target.value)}
+        className="bg-zinc-800 border border-zinc-700 text-zinc-300 text-xs rounded-lg px-3 py-1.5 focus:outline-none focus:border-blue-500">
+        {PERIOD_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+      </select>
+      {value === 'custom' && (
+        <>
+          <input
+            type="date"
+            value={customFrom ?? ''}
+            onChange={e => onCustomChange?.(e.target.value, customTo ?? '')}
+            className="bg-zinc-800 border border-zinc-700 text-zinc-300 text-xs rounded-lg px-3 py-1.5 focus:outline-none focus:border-blue-500"
+          />
+          <span className="text-zinc-600 text-xs">até</span>
+          <input
+            type="date"
+            value={customTo ?? ''}
+            onChange={e => onCustomChange?.(customFrom ?? '', e.target.value)}
+            className="bg-zinc-800 border border-zinc-700 text-zinc-300 text-xs rounded-lg px-3 py-1.5 focus:outline-none focus:border-blue-500"
+          />
+        </>
+      )}
+    </div>
   )
 }
 
@@ -82,9 +109,9 @@ function InsightItem({ type, text }: { type: 'success' | 'warning' | 'danger' | 
 }
 
 // ─── Página de Anúncios (filial) ─────────────────────────────────────────────
-function AdsPage({ filialId, period }: { filialId: string; period: string }) {
+function AdsPage({ filialId, period, customFrom, customTo }: { filialId: string; period: string; customFrom: string; customTo: string }) {
   const filial = FILIAIS.find(f => f.id === filialId) ?? FILIAIS[0]
-  const { from, to } = getPeriodDates(period)
+  const { from, to } = getPeriodDates(period, customFrom, customTo)
   const [metaCampaigns, setMetaCampaigns] = useState<Campaign[]>([])
   const [googleCampaigns, setGoogleCampaigns] = useState<Campaign[]>([])
   const [adsets, setAdsets] = useState<any[]>([])
@@ -349,10 +376,12 @@ function AdsPage({ filialId, period }: { filialId: string; period: string }) {
 
 // ─── Página de Analytics + CRM ───────────────────────────────────────────────
 function AnalyticsPage() {
-  const [overviewPeriod, setOverviewPeriod] = useState('current-month')
-  const [ga4Period, setGa4Period] = useState('current-month')
-  const [crmPeriod, setCrmPeriod] = useState('current-month')
-  const { from: ovFrom, to: ovTo } = getPeriodDates(overviewPeriod)
+  const [overviewPeriod, setOverviewPeriod] = useState('last-month')
+  const [overviewCustomFrom, setOverviewCustomFrom] = useState('')
+  const [overviewCustomTo, setOverviewCustomTo] = useState('')
+  const [ga4Period, setGa4Period] = useState('last-month')
+  const [crmPeriod, setCrmPeriod] = useState('last-month')
+  const { from: ovFrom, to: ovTo } = getPeriodDates(overviewPeriod, overviewCustomFrom, overviewCustomTo)
   const [accounts, setAccounts] = useState<any[]>([])
   const [loadingOverview, setLoadingOverview] = useState(true)
 
@@ -396,7 +425,13 @@ function AnalyticsPage() {
           <h2 className="text-base font-semibold text-white">Meta ADS — Por Conta</h2>
           <p className="text-xs text-zinc-500 mt-0.5">Todas as contas de {CLIENT.name}</p>
         </div>
-        <PeriodSelect value={overviewPeriod} onChange={setOverviewPeriod} />
+        <PeriodSelect
+            value={overviewPeriod}
+            onChange={setOverviewPeriod}
+            customFrom={overviewCustomFrom}
+            customTo={overviewCustomTo}
+            onCustomChange={(f, t) => { setOverviewCustomFrom(f); setOverviewCustomTo(t) }}
+          />
       </div>
 
       {loadingOverview ? (
@@ -642,7 +677,9 @@ function CrmPage() {
 // ─── Dashboard Principal ──────────────────────────────────────────────────────
 export default function LilianDalpraDashboard() {
   const [activeTab, setActiveTab] = useState<ActiveTab>(FILIAIS[0].id)
-  const [period, setPeriod] = useState('current-month')
+  const [period, setPeriod] = useState('last-month')
+  const [customFrom, setCustomFrom] = useState('')
+  const [customTo, setCustomTo] = useState('')
 
   const isFilialTab = FILIAIS.some(f => f.id === activeTab)
 
@@ -663,7 +700,15 @@ export default function LilianDalpraDashboard() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            {isFilialTab && <PeriodSelect value={period} onChange={setPeriod} />}
+            {isFilialTab && (
+              <PeriodSelect
+                value={period}
+                onChange={setPeriod}
+                customFrom={customFrom}
+                customTo={customTo}
+                onCustomChange={(f, t) => { setCustomFrom(f); setCustomTo(t) }}
+              />
+            )}
             <button onClick={handleLogout} className="text-zinc-500 hover:text-zinc-300 text-xs px-3 py-1.5 rounded-lg hover:bg-zinc-800 transition-colors">Sair</button>
           </div>
         </div>
@@ -682,7 +727,7 @@ export default function LilianDalpraDashboard() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-6">
-        {isFilialTab && <AdsPage filialId={activeTab} period={period} />}
+        {isFilialTab && <AdsPage filialId={activeTab} period={period} customFrom={customFrom} customTo={customTo} />}
         {activeTab === 'analytics' && <AnalyticsPage />}
         {activeTab === 'kanban' && <div className="space-y-5"><KanbanBoard /></div>}
       </main>
