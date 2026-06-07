@@ -392,7 +392,7 @@ function AnalyticsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-base font-semibold text-white">Meta ADS — Por Conta</h2>
-          <p className="text-xs text-zinc-500 mt-0.5">Todas as contas da GPinheiro</p>
+          <p className="text-xs text-zinc-500 mt-0.5">Todas as contas de {CLIENT.name}</p>
         </div>
         <PeriodSelect value={overviewPeriod} onChange={setOverviewPeriod} />
       </div>
@@ -638,8 +638,8 @@ function CrmPage() {
 }
 
 // ─── Dashboard Principal ──────────────────────────────────────────────────────
-export default function GPinheiroDashboard() {
-  const [activeTab, setActiveTab] = useState<ActiveTab>('florianopolis')
+export default function LilianDalpraDashboard() {
+  const [activeTab, setActiveTab] = useState<ActiveTab>(FILIAIS[0].id)
   const [period, setPeriod] = useState('current-month')
 
   const isFilialTab = FILIAIS.some(f => f.id === activeTab)
@@ -654,9 +654,9 @@ export default function GPinheiroDashboard() {
       <header className="border-b border-zinc-800 bg-zinc-900/60 backdrop-blur sticky top-0 z-20">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 shrink-0">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white text-sm font-bold">GP</div>
+            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white text-sm font-bold">LD</div>
             <div>
-              <h1 className="text-sm font-semibold text-white">GPinheiro</h1>
+              <h1 className="text-sm font-semibold text-white">{CLIENT.name}</h1>
               <p className="text-xs text-zinc-500">Dashboard de Performance</p>
             </div>
           </div>
