@@ -1,7 +1,6 @@
 import { Campaign, KpiData } from './types'
 
 const BASE = 'https://graph.facebook.com/v21.0'
-const TOKEN = process.env.META_ACCESS_TOKEN ?? ''
 
 export interface MetaInsight {
   campaign_id: string
@@ -27,7 +26,8 @@ export async function fetchMetaInsights(
   dateFrom: string,
   dateTo: string
 ): Promise<Campaign[]> {
-  if (!TOKEN) return []
+  const token = process.env.META_ACCESS_TOKEN
+  if (!token) return []
 
   const fields = [
     'campaign_id',
@@ -45,12 +45,12 @@ export async function fetchMetaInsights(
     fields,
     time_range: JSON.stringify({ since: dateFrom, until: dateTo }),
     level: 'campaign',
-    access_token: TOKEN,
+    access_token: token,
     limit: '100',
   })
 
   const url = `${BASE}/act_${accountId}/insights?${params}`
-  const res = await fetch(url, { next: { revalidate: 300 } })
+  const res = await fetch(url, { cache: 'no-store' })
 
   if (!res.ok) {
     console.error(`Meta API error for account ${accountId}:`, await res.text())

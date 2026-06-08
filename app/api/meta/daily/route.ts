@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+export const dynamic = 'force-dynamic'
 import { FILIAIS } from '@/lib/types'
 
 const BASE = 'https://graph.facebook.com/v21.0'
@@ -11,7 +12,7 @@ function getLeads(actions?: { action_type: string; value: string }[]): number {
 }
 
 async function fetchDailyForAccount(accountId: string, dateFrom: string, dateTo: string) {
-  const token = process.env.META_ACCESS_TOKEN
+  const token = process.env.META_ACCESS_TOKEN ?? ''
   if (!token) return []
 
   const params = new URLSearchParams({
@@ -24,7 +25,7 @@ async function fetchDailyForAccount(accountId: string, dateFrom: string, dateTo:
   })
 
   const res = await fetch(`${BASE}/act_${accountId}/insights?${params}`, {
-    next: { revalidate: 300 },
+    cache: 'no-store',
   })
   if (!res.ok) return []
   const data = await res.json()

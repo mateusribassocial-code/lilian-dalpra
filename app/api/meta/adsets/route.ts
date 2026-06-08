@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
+export const dynamic = 'force-dynamic'
 import { FILIAIS } from '@/lib/types'
 
 const BASE = 'https://graph.facebook.com/v21.0'
-const TOKEN = process.env.META_ACCESS_TOKEN ?? ''
 
 async function fetchAdSets(accountId: string, dateFrom: string, dateTo: string) {
+  const TOKEN = process.env.META_ACCESS_TOKEN
   if (!TOKEN) return []
   const fields = 'adset_id,adset_name,spend,impressions,clicks,ctr,actions,frequency,reach'
   const params = new URLSearchParams({
@@ -14,7 +15,7 @@ async function fetchAdSets(accountId: string, dateFrom: string, dateTo: string) 
     access_token: TOKEN,
     limit: '100',
   })
-  const res = await fetch(`${BASE}/act_${accountId}/insights?${params}`, { next: { revalidate: 300 } })
+  const res = await fetch(`${BASE}/act_${accountId}/insights?${params}`, { cache: 'no-store' })
   if (!res.ok) return []
   const data = await res.json()
   return (data.data ?? []).map((r: any) => {
