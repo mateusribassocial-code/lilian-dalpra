@@ -1,8 +1,12 @@
 import { NextResponse } from 'next/server'
+export const dynamic = 'force-dynamic'
 
 export async function GET() {
+  const token = process.env.META_ACCESS_TOKEN ?? ''
   const vars = {
-    META_ACCESS_TOKEN: !!process.env.META_ACCESS_TOKEN,
+    META_ACCESS_TOKEN: !!token,
+    META_TOKEN_LEN: token.length,
+    META_TOKEN_PREFIX: token.slice(0, 10),
     GA4_PROPERTY_ID: !!process.env.GA4_PROPERTY_ID,
     GA4_CLIENT_ID: !!process.env.GA4_CLIENT_ID,
     GA4_CLIENT_SECRET: !!process.env.GA4_CLIENT_SECRET,
@@ -14,11 +18,13 @@ export async function GET() {
 
   // Testa token Meta
   let metaOk = false
-  if (process.env.META_ACCESS_TOKEN) {
+  let metaError = ''
+  if (token) {
     try {
-      const res = await fetch(`https://graph.facebook.com/v21.0/me?access_token=${process.env.META_ACCESS_TOKEN}`)
+      const res = await fetch(`https://graph.facebook.com/v21.0/me?access_token=${token}`, { cache: 'no-store' })
       metaOk = res.ok
-    } catch {}
+      if (!res.ok) metaError = await res.text()
+    } catch (e: any) { metaError = e?.message }
   }
 
   // Testa token GA4
@@ -40,5 +46,5 @@ export async function GET() {
     } catch {}
   }
 
-  return NextResponse.json({ vars, metaOk, ga4Ok })
+  return NextResponse.json({ vars, metaOk, metaError, ga4Ok })
 }
