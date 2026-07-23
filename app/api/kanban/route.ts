@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server'
-import { fetchKanbanLeads, groupByStage } from '@/lib/kanban'
+export const dynamic = 'force-dynamic'
+import { fetchCrmLeads } from '@/lib/sheets'
+import { groupByStage } from '@/lib/kanban'
 
 export async function GET() {
-  const leads = await fetchKanbanLeads()
+  const leads = await fetchCrmLeads()
   const board = groupByStage(leads)
   return NextResponse.json({ board, total: leads.length })
 }

@@ -82,6 +82,19 @@ git push -u origin main
 
 ---
 
+## Kanban CRM (aba "Kanban") — Google Sheets com escrita
+
+O Kanban lê e **escreve** na planilha `KANBAN_CONFIG.spreadsheetId` (`lib/client.config.ts`) via Service Account do Google Cloud (`lib/sheets.ts`), mesmo padrão usado no dashboard da Jessica Corrêa (`Dashboard Individual`). Os cards podem ser arrastados entre colunas — isso grava a nova Etapa de Funil direto na planilha (`PATCH /api/kanban/stage`). Cada card tem um botão de WhatsApp (`wa.me/<telefone>`).
+
+**Setup:**
+1. No Google Cloud Console, use a mesma Service Account já criada para outros clientes (ou crie uma nova) e compartilhe a planilha CRM da corretora com o `client_email` dela, permissão de **Editor** (não só Leitor — o Kanban escreve, não só lê).
+2. No `.env.local`/Vercel, preencha `SHEETS_CLIENT_EMAIL` e `SHEETS_PRIVATE_KEY` (mesmas variáveis usadas no template da Jessica).
+3. Se a escrita falhar (ex: permissão insuficiente), o card volta pro lugar no drag-and-drop e mostra um aviso — não é erro silencioso.
+
+### Automação (Agenda) — Data Visita → Google Agenda
+
+Se a planilha tiver as colunas `Data Visita` / `Hora Visita` / (ID Evento Agenda), um Google Apps Script amarrado na própria planilha pode criar/atualizar eventos na Agenda da corretora automaticamente. Fonte: [`scripts/apps-script/agenda-sync.gs`](scripts/apps-script/agenda-sync.gs). Passo a passo completo (compartilhar agenda, colar script, criar acionador instalável) está documentado no README do template original (`Dashboard Individual/README.md`, seção "Automação (Agenda)") — ainda não configurado para este cliente.
+
 ## Renovação do token Meta
 
 O token Meta expira em ~60 dias. Para renovar:
