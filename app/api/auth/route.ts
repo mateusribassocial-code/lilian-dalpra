@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
   }
 
   const payload = JSON.stringify({
-    client: 'dashboard',
+    client: 'dashboard-jessica-correa',
     expires: Date.now() + 1000 * 60 * 60 * 24 * 7,
   })
   const token = Buffer.from(payload).toString('base64')

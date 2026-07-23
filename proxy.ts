@@ -1,34 +1,23 @@
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 
-export function proxy(request: NextRequest) {
-  const { pathname } = request.nextUrl
+export function proxy(req: NextRequest) {
+  const session = req.cookies.get('dashboard_session')
+  const { pathname } = req.nextUrl
 
-  if (!pathname.startsWith('/dashboard')) return NextResponse.next()
-
-  const session = request.cookies.get('dashboard_session')?.value
-  if (!session) {
-    const loginUrl = new URL('/login', request.url)
-    loginUrl.searchParams.set('redirect', pathname)
-    return NextResponse.redirect(loginUrl)
+  if (pathname.startsWith('/login') || pathname.startsWith('/api/auth')) {
+    return NextResponse.next()
   }
 
-  try {
-    const decoded = Buffer.from(session, 'base64').toString('utf-8')
-    const { client, expires } = JSON.parse(decoded)
-    if (Date.now() > expires) throw new Error('expired')
-    if (client !== 'dashboard') throw new Error('forbidden')
-  } catch {
-    const loginUrl = new URL('/login', request.url)
-    loginUrl.searchParams.set('redirect', pathname)
-    const res = NextResponse.redirect(loginUrl)
-    res.cookies.delete('dashboard_session')
-    return res
+  if (!session) {
+    const url = req.nextUrl.clone()
+    url.pathname = '/login'
+    url.searchParams.set('redirect', pathname)
+    return NextResponse.redirect(url)
   }
 
   return NextResponse.next()
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*'],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
 }

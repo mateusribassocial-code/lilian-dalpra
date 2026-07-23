@@ -2,11 +2,9 @@ import { Campaign, KpiData } from './types'
 
 const BASE = 'https://graph.facebook.com/v21.0'
 
-export interface MetaInsight {
+interface MetaInsight {
   campaign_id: string
   campaign_name: string
-  account_id: string
-  status: string
   spend: string
   impressions: string
   clicks: string
@@ -29,17 +27,7 @@ export async function fetchMetaInsights(
   const token = process.env.META_ACCESS_TOKEN
   if (!token) return []
 
-  const fields = [
-    'campaign_id',
-    'campaign_name',
-    'spend',
-    'impressions',
-    'clicks',
-    'ctr',
-    'actions',
-    'reach',
-    'frequency',
-  ].join(',')
+  const fields = ['campaign_id', 'campaign_name', 'spend', 'impressions', 'clicks', 'ctr', 'actions'].join(',')
 
   const params = new URLSearchParams({
     fields,
@@ -53,7 +41,7 @@ export async function fetchMetaInsights(
   const res = await fetch(url, { cache: 'no-store' })
 
   if (!res.ok) {
-    console.error(`Meta API error for account ${accountId}:`, await res.text())
+    console.error(`[Meta] erro na conta ${accountId}:`, await res.text())
     return []
   }
 
@@ -73,7 +61,6 @@ export async function fetchMetaInsights(
       ctr: parseFloat(i.ctr) || 0,
       impressions: parseInt(i.impressions) || 0,
       clicks: parseInt(i.clicks) || 0,
-      platform: 'meta',
     }
   })
 }

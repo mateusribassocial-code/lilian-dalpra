@@ -20,3 +20,37 @@ export function groupByStage(leads: CrmLead[]): Record<KanbanStage, CrmLead[]> {
   }
   return board
 }
+
+export function distinctCampaigns(leads: CrmLead[]): string[] {
+  const set = new Set(leads.map(l => l.campanha).filter(Boolean))
+  return Array.from(set).sort()
+}
+
+export interface CampaignStageBreakdown {
+  campanha: string
+  total: number
+  porEtapa: Record<KanbanStage, number>
+}
+
+export function breakdownByCampaign(leads: CrmLead[]): CampaignStageBreakdown[] {
+  const map = new Map<string, CampaignStageBreakdown>()
+
+  for (const lead of leads) {
+    const campanha = lead.campanha || '(sem campanha)'
+    const stage = normalizeStage(lead.etapaFunil)
+
+    if (!map.has(campanha)) {
+      map.set(campanha, {
+        campanha,
+        total: 0,
+        porEtapa: Object.fromEntries(KANBAN_CONFIG.stages.map(s => [s, 0])) as Record<KanbanStage, number>,
+      })
+    }
+
+    const entry = map.get(campanha)!
+    entry.total++
+    entry.porEtapa[stage]++
+  }
+
+  return Array.from(map.values()).sort((a, b) => b.total - a.total)
+}

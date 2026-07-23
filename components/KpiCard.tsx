@@ -1,39 +1,27 @@
-'use client'
+const COLORS: Record<string, string> = {
+  blue: 'text-blue-600',
+  green: 'text-emerald-600',
+  orange: 'text-orange-600',
+  purple: 'text-purple-600',
+  red: 'text-red-600',
+}
 
-interface KpiCardProps {
+export function KpiCard({ label, value, sub, loading, color = 'blue' }: {
   label: string
   value: string
   sub?: string
-  trend?: number
-  color?: 'blue' | 'green' | 'orange' | 'red' | 'purple'
   loading?: boolean
-}
-
-const colorMap = {
-  blue: 'text-blue-400',
-  green: 'text-emerald-400',
-  orange: 'text-orange-400',
-  red: 'text-red-400',
-  purple: 'text-purple-400',
-}
-
-export function KpiCard({ label, value, sub, trend, color = 'blue', loading }: KpiCardProps) {
+  color?: keyof typeof COLORS
+}) {
   return (
-    <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 flex flex-col gap-1">
-      <span className="text-xs text-zinc-500 uppercase tracking-wide">{label}</span>
+    <div className="bg-white border border-zinc-200 rounded-xl p-4 shadow-sm">
+      <p className="text-xs text-zinc-500">{label}</p>
       {loading ? (
-        <div className="h-8 w-24 bg-zinc-800 rounded animate-pulse mt-1" />
+        <div className="h-7 w-20 bg-zinc-200 rounded animate-pulse mt-1.5" />
       ) : (
-        <span className={`text-2xl font-bold ${colorMap[color]}`}>{value}</span>
+        <p className={`text-2xl font-bold mt-1 ${COLORS[color]}`}>{value}</p>
       )}
-      <div className="flex items-center gap-2 mt-0.5">
-        {sub && <span className="text-xs text-zinc-500">{sub}</span>}
-        {trend !== undefined && !loading && (
-          <span className={`text-xs font-medium ${trend >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-            {trend >= 0 ? '↑' : '↓'} {Math.abs(trend).toFixed(1)}%
-          </span>
-        )}
-      </div>
+      {sub && <p className="text-xs text-zinc-400 mt-1">{sub}</p>}
     </div>
   )
 }
